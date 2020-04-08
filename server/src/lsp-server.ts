@@ -97,7 +97,7 @@ export class LspServer {
         this.logger.log('initialize', params);
         this.initializeParams = params;
 
-        const { logVerbosity, plugins }: TypeScriptInitializationOptions = {
+        const { logVerbosity, plugins, compilerOptionsForInferredProjects }: TypeScriptInitializationOptions = {
             logVerbosity: this.options.tsserverLogVerbosity,
             plugins: [],
             ...this.initializeParams.initializationOptions
@@ -127,6 +127,10 @@ export class LspServer {
                 allowTextChangesInNewFiles: true
             }
         });
+
+        if (compilerOptionsForInferredProjects) {
+            await this.compilerOptionsForInferredProjects(compilerOptionsForInferredProjects);
+        }
 
         const logFileUri = logFile && pathToUri(logFile, undefined);
         this.initializeResult = {
@@ -306,6 +310,7 @@ export class LspServer {
 
         for (const change of params.contentChanges) {
             let line, offset, endLine, endOffset = 0;
+            // @ts-ignore
             if (!change.range) {
                 line = 1;
                 offset = 1;
@@ -313,9 +318,13 @@ export class LspServer {
                 endLine = endPos.line + 1;
                 endOffset = endPos.character + 1;
             } else {
+                // @ts-ignore
                 line = change.range.start.line + 1;
+                // @ts-ignore
                 offset = change.range.start.character + 1;
+                // @ts-ignore
                 endLine = change.range.end.line + 1;
+                // @ts-ignore
                 endOffset = change.range.end.character + 1;
             }
             this.tspClient.notify(CommandTypes.Change, {
@@ -333,6 +342,10 @@ export class LspServer {
 
     didSaveTextDocument(params: lsp.DidChangeTextDocumentParams): void {
         // do nothing
+    }
+
+    async compilerOptionsForInferredProjects(params: tsp.SetCompilerOptionsForInferredProjectsArgs): Promise<tsp.SetCompilerOptionsForInferredProjectsResponse> {
+        return this.tspClient.request(tsp.CommandTypes.CompilerOptionsForInferredProjects, params);
     }
 
     async definition(params: lsp.TextDocumentPositionParams): Promise<lsp.Definition> {
@@ -449,8 +462,10 @@ export class LspServer {
         const { body } = await this.interuptDiagnostics(() => this.tspClient.request(CommandTypes.CompletionDetails, item.data));
         const details = body && body.length && body[0];
         if (!details) {
+            // @ts-ignore
             return item;
         }
+        // @ts-ignore
         return asResolvedCompletionItem(item, details);
     }
 

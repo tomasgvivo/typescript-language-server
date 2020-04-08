@@ -60,6 +60,7 @@ interface TypeScriptRequestTypes {
     'rename': [protocol.RenameRequestArgs, protocol.RenameResponse];
     'signatureHelp': [protocol.SignatureHelpRequestArgs, protocol.SignatureHelpResponse];
     'typeDefinition': [protocol.FileLocationRequestArgs, protocol.TypeDefinitionResponse];
+    'compilerOptionsForInferredProjects': [protocol.SetCompilerOptionsForInferredProjectsArgs, protocol.SetCompilerOptionsForInferredProjectsResponse]
 }
 
 export class TspClient {

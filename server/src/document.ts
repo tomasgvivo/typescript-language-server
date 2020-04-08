@@ -72,8 +72,11 @@ export class LspDocument implements lsp.TextDocument {
     applyEdit(version: number, change: lsp.TextDocumentContentChangeEvent): void {
         const content = this.getText();
         let newContent = change.text;
+        // @ts-ignore
         if (change.range) {
+            // @ts-ignore
             const start = this.offsetAt(change.range.start);
+            // @ts-ignore
             const end = this.offsetAt(change.range.end);
             newContent = content.substr(0, start) + change.text + content.substr(end);
         }
